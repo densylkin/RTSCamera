@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace RTS_Cam
@@ -31,6 +31,7 @@ namespace RTS_Cam
 
         #region Movement
 
+        public bool game2D;
         public float keyboardMovementSpeed = 5f; //speed with keyboard movement
         public float screenEdgeMovementSpeed = 3f; //spee with screen edge movement
         public float followingSpeed = 5f; //speed when following a target
@@ -168,6 +169,11 @@ namespace RTS_Cam
         private void Start()
         {
             m_Transform = transform;
+
+            if (game2D)
+            {
+                transform.rotation = Quaternion.identity;
+            }
         }
 
         private void Update()
@@ -240,7 +246,16 @@ namespace RTS_Cam
         
             if(usePanning && Input.GetKey(panningKey) && MouseAxis != Vector2.zero)
             {
-                Vector3 desiredMove = new Vector3(-MouseAxis.x, 0, -MouseAxis.y);
+                Vector3 desiredMove;
+
+                if (!game2D)
+                {
+                    desiredMove = new Vector3(-MouseAxis.x, 0, -MouseAxis.y);
+                }
+                else
+                {
+                    desiredMove = new Vector3(-MouseAxis.x, -MouseAxis.y, 0);
+                }
 
                 desiredMove *= panningSpeed;
                 desiredMove *= Time.deltaTime;
@@ -270,8 +285,10 @@ namespace RTS_Cam
             if(distanceToGround != targetHeight)
                 difference = targetHeight - distanceToGround;
 
-            m_Transform.position = Vector3.Lerp(m_Transform.position, 
-                new Vector3(m_Transform.position.x, targetHeight + difference, m_Transform.position.z), Time.deltaTime * heightDampening);
+            if (!game2D)
+            {
+                m_Transform.position = Vector3.Lerp(m_Transform.position, new Vector3(m_Transform.position.x, targetHeight + difference, m_Transform.position.z), Time.deltaTime * heightDampening);
+            }
         }
 
         /// <summary>
