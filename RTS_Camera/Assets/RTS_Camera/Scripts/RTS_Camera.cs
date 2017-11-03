@@ -243,7 +243,15 @@ namespace RTS_Cam
                 Rect downRect = new Rect(0, 0, Screen.width, screenEdgeBorder);
 
                 desiredMove.x = leftRect.Contains(MouseInput) ? -1 : rightRect.Contains(MouseInput) ? 1 : 0;
-                desiredMove.z = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
+                
+                if (!game2D)
+                {
+                    desiredMove.z = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
+                }
+                else
+                {
+                    desiredMove.y = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
+                }
 
                 desiredMove *= screenEdgeMovementSpeed;
                 desiredMove *= Time.deltaTime;
