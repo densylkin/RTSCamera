@@ -73,7 +73,8 @@ namespace RTS_Cam
             if(camera.usePanning)
             {
                 camera.panningKey = (KeyCode)EditorGUILayout.EnumPopup("Panning when holding: ", camera.panningKey);
-                camera.panningSpeed = EditorGUILayout.FloatField("Panning speed: ", camera.panningSpeed);
+                camera.panningSpeedPC = EditorGUILayout.FloatField("Panning speed PC: ", camera.panningSpeedPC);
+                camera.panningSpeedMobile = EditorGUILayout.FloatField("Panning speed Mobile: ", camera.panningSpeedMobile);
             }
 
             using (new HorizontalBlock())
