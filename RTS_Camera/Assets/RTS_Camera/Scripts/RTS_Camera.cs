@@ -214,7 +214,16 @@ namespace RTS_Cam
         {
             if (useKeyboardInput)
             {
-                Vector3 desiredMove = new Vector3(KeyboardInput.x, 0, KeyboardInput.y);
+                Vector3 desiredMove;
+
+                if (!game2D)
+                {
+                    desiredMove = new Vector3(KeyboardInput.x, 0, KeyboardInput.y);
+                }
+                else
+                {
+                    desiredMove = new Vector3(KeyboardInput.x, KeyboardInput.y, 0);
+                }
 
                 desiredMove *= keyboardMovementSpeed;
                 desiredMove *= Time.deltaTime;
