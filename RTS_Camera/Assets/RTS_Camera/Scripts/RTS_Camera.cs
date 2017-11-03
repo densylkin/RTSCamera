@@ -36,7 +36,8 @@ namespace RTS_Cam
         public float screenEdgeMovementSpeed = 3f; //spee with screen edge movement
         public float followingSpeed = 5f; //speed when following a target
         public float rotationSped = 3f;
-        public float panningSpeed = 10f;
+        public float panningSpeedPC = 10f;
+        public float panningSpeedMobile = 1f;
         public float mouseRotationSpeed = 10f;
 
         #endregion
@@ -243,7 +244,7 @@ namespace RTS_Cam
                 Rect downRect = new Rect(0, 0, Screen.width, screenEdgeBorder);
 
                 desiredMove.x = leftRect.Contains(MouseInput) ? -1 : rightRect.Contains(MouseInput) ? 1 : 0;
-                
+
                 if (!game2D)
                 {
                     desiredMove.z = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
@@ -251,7 +252,7 @@ namespace RTS_Cam
                 else
                 {
                     desiredMove.y = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
-                }
+                }                
 
                 desiredMove *= screenEdgeMovementSpeed;
                 desiredMove *= Time.deltaTime;
@@ -259,8 +260,9 @@ namespace RTS_Cam
                 desiredMove = m_Transform.InverseTransformDirection(desiredMove);
 
                 m_Transform.Translate(desiredMove, Space.Self);
-            }       
-        
+            }
+
+            // For PC
             if(usePanning && Input.GetKey(panningKey) && MouseAxis != Vector2.zero)
             {
                 Vector3 desiredMove;
@@ -274,12 +276,19 @@ namespace RTS_Cam
                     desiredMove = new Vector3(-MouseAxis.x, -MouseAxis.y, 0);
                 }
 
-                desiredMove *= panningSpeed;
+                desiredMove *= panningSpeedPC;
                 desiredMove *= Time.deltaTime;
                 desiredMove = Quaternion.Euler(new Vector3(0f, transform.eulerAngles.y, 0f)) * desiredMove;
                 desiredMove = m_Transform.InverseTransformDirection(desiredMove);
 
                 m_Transform.Translate(desiredMove, Space.Self);
+            }
+
+            // For Mobile
+            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+            {
+                Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
+                transform.Translate(-touchDeltaPosition.x * 2 * Time.deltaTime, -touchDeltaPosition.y * 2 * Time.deltaTime, 0);
             }
         }
 
