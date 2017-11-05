@@ -32,6 +32,7 @@ namespace RTS_Cam
         #region Movement
 
         public bool game2D;
+        public bool forMobile;
         public float keyboardMovementSpeed = 5f; //speed with keyboard movement
         public float screenEdgeMovementSpeed = 3f; //spee with screen edge movement
         public float followingSpeed = 5f; //speed when following a target
@@ -175,6 +176,12 @@ namespace RTS_Cam
             {
                 transform.rotation = Quaternion.identity;
             }
+
+            #if UNITY_STANDALONE || UNITY_EDITOR
+                forMobile = false;
+            #else
+                forMobile = true;
+            #endif
         }
 
         private void Update()
@@ -189,9 +196,9 @@ namespace RTS_Cam
                 CameraUpdate();
         }
 
-        #endregion
+#endregion
 
-        #region RTSCamera_Methods
+#region RTSCamera_Methods
 
         /// <summary>
         /// update camera movement and rotation
@@ -263,7 +270,7 @@ namespace RTS_Cam
             }
 
             // For PC
-            if(usePanning && Input.GetKey(panningKey) && MouseAxis != Vector2.zero)
+            if(usePanning && Input.GetKey(panningKey) && MouseAxis != Vector2.zero && !forMobile)
             {
                 Vector3 desiredMove;
 
@@ -288,7 +295,7 @@ namespace RTS_Cam
             if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
             {
                 Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
-                transform.Translate(-touchDeltaPosition.x * 2 * Time.deltaTime, -touchDeltaPosition.y * 2 * Time.deltaTime, 0);
+                transform.Translate(-touchDeltaPosition.x * panningSpeedMobile * Time.deltaTime, -touchDeltaPosition.y * panningSpeedMobile * Time.deltaTime, 0);
             }
         }
 
@@ -382,6 +389,6 @@ namespace RTS_Cam
             return 0f;
         }
 
-        #endregion
+#endregion
     }
 }
