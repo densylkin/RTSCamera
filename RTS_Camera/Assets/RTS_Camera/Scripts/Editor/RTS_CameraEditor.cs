@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 
@@ -36,9 +36,16 @@ namespace RTS_Cam
         {
             using (new HorizontalBlock())
             {
+                GUILayout.Label("Game 2D: ", EditorStyles.boldLabel, GUILayout.Width(170f));
+                camera.game2D = EditorGUILayout.Toggle(camera.game2D);
+            }
+
+            using (new HorizontalBlock())
+            {
                 GUILayout.Label("Use keyboard input: ", EditorStyles.boldLabel, GUILayout.Width(170f));
                 camera.useKeyboardInput = EditorGUILayout.Toggle( camera.useKeyboardInput);
             }
+
             if(camera.useKeyboardInput)
             {
                 camera.horizontalAxis = EditorGUILayout.TextField("Horizontal axis name: ", camera.horizontalAxis);
@@ -66,7 +73,8 @@ namespace RTS_Cam
             if(camera.usePanning)
             {
                 camera.panningKey = (KeyCode)EditorGUILayout.EnumPopup("Panning when holding: ", camera.panningKey);
-                camera.panningSpeed = EditorGUILayout.FloatField("Panning speed: ", camera.panningSpeed);
+                camera.panningSpeedPC = EditorGUILayout.FloatField("Panning speed PC: ", camera.panningSpeedPC);
+                camera.panningSpeedMobile = EditorGUILayout.FloatField("Panning speed Mobile: ", camera.panningSpeedMobile);
             }
 
             using (new HorizontalBlock())

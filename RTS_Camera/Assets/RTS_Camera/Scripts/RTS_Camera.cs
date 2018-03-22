@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace RTS_Cam
@@ -31,11 +31,14 @@ namespace RTS_Cam
 
         #region Movement
 
+        public bool game2D;
+        public bool forMobile;
         public float keyboardMovementSpeed = 5f; //speed with keyboard movement
         public float screenEdgeMovementSpeed = 3f; //spee with screen edge movement
         public float followingSpeed = 5f; //speed when following a target
         public float rotationSped = 3f;
-        public float panningSpeed = 10f;
+        public float panningSpeedPC = 10f;
+        public float panningSpeedMobile = 1f;
         public float mouseRotationSpeed = 10f;
 
         #endregion
@@ -168,6 +171,17 @@ namespace RTS_Cam
         private void Start()
         {
             m_Transform = transform;
+
+            if (game2D)
+            {
+                transform.rotation = Quaternion.identity;
+            }
+
+            #if UNITY_STANDALONE || UNITY_EDITOR
+                forMobile = false;
+            #else
+                forMobile = true;
+            #endif
         }
 
         private void Update()
@@ -182,9 +196,9 @@ namespace RTS_Cam
                 CameraUpdate();
         }
 
-        #endregion
+#endregion
 
-        #region RTSCamera_Methods
+#region RTSCamera_Methods
 
         /// <summary>
         /// update camera movement and rotation
@@ -208,7 +222,16 @@ namespace RTS_Cam
         {
             if (useKeyboardInput)
             {
-                Vector3 desiredMove = new Vector3(KeyboardInput.x, 0, KeyboardInput.y);
+                Vector3 desiredMove;
+
+                if (!game2D)
+                {
+                    desiredMove = new Vector3(KeyboardInput.x, 0, KeyboardInput.y);
+                }
+                else
+                {
+                    desiredMove = new Vector3(KeyboardInput.x, KeyboardInput.y, 0);
+                }
 
                 desiredMove *= keyboardMovementSpeed;
                 desiredMove *= Time.deltaTime;
@@ -228,7 +251,15 @@ namespace RTS_Cam
                 Rect downRect = new Rect(0, 0, Screen.width, screenEdgeBorder);
 
                 desiredMove.x = leftRect.Contains(MouseInput) ? -1 : rightRect.Contains(MouseInput) ? 1 : 0;
-                desiredMove.z = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
+
+                if (!game2D)
+                {
+                    desiredMove.z = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
+                }
+                else
+                {
+                    desiredMove.y = upRect.Contains(MouseInput) ? 1 : downRect.Contains(MouseInput) ? -1 : 0;
+                }                
 
                 desiredMove *= screenEdgeMovementSpeed;
                 desiredMove *= Time.deltaTime;
@@ -236,18 +267,35 @@ namespace RTS_Cam
                 desiredMove = m_Transform.InverseTransformDirection(desiredMove);
 
                 m_Transform.Translate(desiredMove, Space.Self);
-            }       
-        
-            if(usePanning && Input.GetKey(panningKey) && MouseAxis != Vector2.zero)
-            {
-                Vector3 desiredMove = new Vector3(-MouseAxis.x, 0, -MouseAxis.y);
+            }
 
-                desiredMove *= panningSpeed;
+            // For PC
+            if(usePanning && Input.GetKey(panningKey) && MouseAxis != Vector2.zero && !forMobile)
+            {
+                Vector3 desiredMove;
+
+                if (!game2D)
+                {
+                    desiredMove = new Vector3(-MouseAxis.x, 0, -MouseAxis.y);
+                }
+                else
+                {
+                    desiredMove = new Vector3(-MouseAxis.x, -MouseAxis.y, 0);
+                }
+
+                desiredMove *= panningSpeedPC;
                 desiredMove *= Time.deltaTime;
                 desiredMove = Quaternion.Euler(new Vector3(0f, transform.eulerAngles.y, 0f)) * desiredMove;
                 desiredMove = m_Transform.InverseTransformDirection(desiredMove);
 
                 m_Transform.Translate(desiredMove, Space.Self);
+            }
+
+            // For Mobile
+            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+            {
+                Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
+                transform.Translate(-touchDeltaPosition.x * panningSpeedMobile * Time.deltaTime, -touchDeltaPosition.y * panningSpeedMobile * Time.deltaTime, 0);
             }
         }
 
@@ -270,8 +318,10 @@ namespace RTS_Cam
             if(distanceToGround != targetHeight)
                 difference = targetHeight - distanceToGround;
 
-            m_Transform.position = Vector3.Lerp(m_Transform.position, 
-                new Vector3(m_Transform.position.x, targetHeight + difference, m_Transform.position.z), Time.deltaTime * heightDampening);
+            if (!game2D)
+            {
+                m_Transform.position = Vector3.Lerp(m_Transform.position, new Vector3(m_Transform.position.x, targetHeight + difference, m_Transform.position.z), Time.deltaTime * heightDampening);
+            }
         }
 
         /// <summary>
@@ -339,6 +389,6 @@ namespace RTS_Cam
             return 0f;
         }
 
-        #endregion
+#endregion
     }
 }
